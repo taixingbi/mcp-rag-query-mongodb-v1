@@ -1,6 +1,6 @@
 # Architecture: RAG MCP Tool Server
 
-An LLM/RAG architecture plan for `taixingbi/mcp-tool-rag-query-v2`, based directly on the code + README.
+An LLM/RAG architecture plan for `taixingbi/mcp-rag-query-mongodb-v1`, based directly on the code + README.
 
 ---
 

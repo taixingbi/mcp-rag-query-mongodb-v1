@@ -95,7 +95,7 @@ docker run -p 8000:8000 --env-file .env rag-mcp
 ## Fly.io Deployment
 
 <!-- One Fly app per env; set secrets per app; deploy with --app <name>. -->
-Use one app per environment: `mcp-rag-query-mongodb-v1-{env}` where `{env}` = `dev`, `qa`, or `prod`. Each app gets its own secrets; the same `fly.toml` is used for all.
+Use one app per environment: `mcp-tool-rag-query-mongodb-v1-{env}` where `{env}` = `dev`, `qa`, or `prod`. Each app gets its own secrets; the same `fly.toml` is used for all.
 
 ### One-time Setup
 
@@ -110,29 +110,29 @@ fly auth token  # Use output as GitHub Actions secret FLY_API_TOKEN if using CI
 Run once per environment:
 
 ```bash
-fly launch --name mcp-rag-query-mongodb-v1-dev
-fly launch --name mcp-rag-query-mongodb-v1-qa
-fly launch --name mcp-rag-query-mongodb-v1-prod
+fly launch --name mcp-tool-rag-query-mongodb-v1-dev
+fly launch --name mcp-tool-rag-query-mongodb-v1-qa
+fly launch --name mcp-tool-rag-query-mongodb-v1-prod
 ```
 
 ### Set Secrets
 
 <!-- Deploy: use --app to target dev/qa/prod; omit --no-cache for faster builds when deps unchanged. -->
 ```bash
-fly deploy --no-cache --app mcp-rag-query-mongodb-v1-dev
-fly deploy --no-cache --app mcp-rag-query-mongodb-v1-qa
-fly deploy --no-cache --app mcp-rag-query-mongodb-v1-prod
+fly deploy --no-cache --app mcp-tool-rag-query-mongodb-v1-dev
+fly deploy --no-cache --app mcp-tool-rag-query-mongodb-v1-qa
+fly deploy --no-cache --app mcp-tool-rag-query-mongodb-v1-prod
 ```
 
 **QA** (from `.env.qa`):
 
 ```bash
-curl https://mcp-rag-query-mongodb-v1-dev.fly.dev/health
+curl https://mcp-tool-rag-query-mongodb-v1-dev.fly.dev/health
 ```
 
 **Prod** (from `.env.prod`):
 
-> **Tip:** If `grep`/`cut` corrupts keys (e.g., 401 errors), paste the key directly: `fly secrets set -a mcp-rag-query-mongodb-v1-dev OPENAI_API_KEY="sk-proj-YOUR_KEY"`
+> **Tip:** If `grep`/`cut` corrupts keys (e.g., 401 errors), paste the key directly: `fly secrets set -a mcp-tool-rag-query-mongodb-v1-dev OPENAI_API_KEY="sk-proj-YOUR_KEY"`
 
 ```bash
   curl -s --max-time 60 -X POST \
@@ -151,7 +151,7 @@ curl https://mcp-rag-query-mongodb-v1-dev.fly.dev/health
       }
     }
   }' \
-  https://mcp-rag-query-mongodb-v1-dev.fly.dev/mcp/
+  https://mcp-tool-rag-query-mongodb-v1-dev.fly.dev/mcp/
 ```
 
 ### Test Deployed Apps
@@ -161,7 +161,7 @@ Replace `{env}` with `dev`, `qa`, or `prod`:
 **Health check:**
 
 ```bash
-curl https://mcp-rag-query-mongodb-v1-dev.fly.dev/health
+curl https://mcp-tool-rag-query-mongodb-v1-dev.fly.dev/health
 ```
 
 **Call MCP tools:**
@@ -173,6 +173,6 @@ curl -s -X POST \
   -H "Content-Type: application/json" \
   -H "Accept: application/json, text/event-stream" \
   -d '{"jsonrpc":"2.0","id":"call-001","method":"tools/call","params":{"name":"rag_query_with_chunks","arguments":{"question":"what is Taixing visa?","request_id":"12345678","session_id":"123456"}}}' \
-  https://mcp-rag-query-mongodb-v1-dev.fly.dev/mcp/
+  https://mcp-tool-rag-query-mongodb-v1-dev.fly.dev/mcp/
 ```
 

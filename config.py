@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     )
 
     app_version: str = Field(default="", alias="APP_VERSION")
-    mcp_name: str = Field(default="mcp-rag-query-mongodb-v1", alias="MCP_NAME")
+    mcp_name: str = Field(default="mcp-tool-rag-query-mongodb-v1", alias="MCP_NAME")
     langsmith_tracing: bool = Field(default=False, alias="LANGSMITH_TRACING")
     langchain_endpoint: str | None = Field(default=None, alias="LANGCHAIN_ENDPOINT")
     langchain_project: str | None = Field(default=None, alias="LANGCHAIN_PROJECT")

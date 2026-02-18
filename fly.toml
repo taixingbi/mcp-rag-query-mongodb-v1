@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for mcp-rag-query-mongodb-v1-dev on 2026-02-11T20:07:36-05:00
+# fly.toml app configuration file generated for mcp-tool-rag-query-mongodb-v1-dev on 2026-02-11T20:07:36-05:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'mcp-rag-query-mongodb-v1-dev'
+app = 'mcp-tool-rag-query-mongodb-v1-dev'
 primary_region = 'ewr'
 
 [build]

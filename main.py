@@ -44,11 +44,11 @@ def rag_query_with_chunks(
         "metadata": result["metadata"],
         "error": None,
         "data": {
-            "question": question,
-            "answer": result["answer"],
             "chunks": result["chunks"],
             "used_chunk_ids": result["used_chunk_ids"],
             "retrieval": result["retrieval"],
+            "question": question,
+            "answer": result["answer"],
         },
     }
 

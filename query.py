@@ -158,6 +158,20 @@ def _search_bm25_atlas(
 
 
 # ----------------------------
+# Fallback (when dense + BM25 both return empty, e.g. indexes missing)
+# ----------------------------
+def _search_fallback(k: int, where: Optional[Dict[str, Any]] = None) -> List[dict]:
+    """Simple find() fallback when Atlas indexes return nothing."""
+    coll = _get_mongo_collection()
+    filter_q = where if where else {}
+    out: List[dict] = []
+    for doc in coll.find(filter_q).limit(k):
+        h = _doc_to_hit(doc, distance=0.0, rrf_score=0.0)
+        out.append(h)
+    return out
+
+
+# ----------------------------
 # RRF fusion
 # ----------------------------
 def _fuse_rrf(
@@ -223,9 +237,11 @@ def _search_dual_rrf(
         bm25_hits = bm25_future.result()
 
     merged = _fuse_rrf(dense_hits, bm25_hits, k_final=k_final, rrf_k=rrf_val)
-
-    # Limit to k for downstream
-    return merged[:k]
+    used_fallback = False
+    if not merged:
+        merged = _search_fallback(k=k_final, where=where)
+        used_fallback = True
+    return merged[:k], used_fallback
 
 
 # ----------------------------
@@ -244,7 +260,7 @@ class CloudRetriever(BaseRetriever):
         run_manager: CallbackManagerForRetrieverRun | None = None,
     ) -> List[Document]:
         k = _default_chunk_k()
-        hits = _search_dual_rrf(query, k=k, where=self.where)
+        hits, _ = _search_dual_rrf(query, k=k, where=self.where)
         return [Document(page_content=h["text"], metadata=h["metadata"]) for h in hits]
 
 
@@ -330,7 +346,7 @@ def retrieve_ranked_chunks(
     Each chunk has rank (1-based), scores (nested), source, preview, text, metadata.
     """
     k_out = k if k is not None else _default_chunk_k()
-    hits = _search_dual_rrf(
+    hits, used_fallback = _search_dual_rrf(
         question,
         k=k_out,
         where=where,
@@ -359,7 +375,7 @@ def retrieve_ranked_chunks(
                 "metadata": meta,
             }
         )
-    return ranked
+    return ranked, used_fallback
 
 
 def run_query_with_chunks(
@@ -374,7 +390,7 @@ def run_query_with_chunks(
     top_k_final: Optional[int] = None,
 ) -> Dict[str, Any]:
     k_out = chunk_k if chunk_k is not None else _default_chunk_k()
-    chunks = retrieve_ranked_chunks(
+    chunks, used_fallback = retrieve_ranked_chunks(
         question,
         k=k_out,
         where=where,
@@ -392,6 +408,11 @@ def run_query_with_chunks(
     used_k = min(settings.retrieval_k, len(chunks))
     used_chunk_ids = list(dict.fromkeys(c["chunk_id"] for c in chunks[:used_k]))
     warnings: List[str] = []
+    if used_fallback:
+        warnings.append(
+            "fallback_used: dense + BM25 recall returned empty; used simple find(). "
+            "Configure Atlas Vector Search and Atlas Search indexes for semantic ranking."
+        )
     return {
         "answer": answer,
         "chunks": chunks,

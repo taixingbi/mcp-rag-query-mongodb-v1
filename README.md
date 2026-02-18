@@ -65,7 +65,7 @@ curl -s --max-time 60 -X POST \
     "params": {
       "name": "rag_query_with_chunks",
       "arguments": {
-        "question": "what is Taixing visa?",
+        "question": "what is Taixing visa status?",
         "request_id": "12345678",
         "session_id": "123456"
       }
